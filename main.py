@@ -3,47 +3,40 @@ import os
 import requests
 import json
 import random
+from dotenv import load_dotenv
+from discord.ext import commands
+
+load_dotenv()
+
+DISCORD_TOKEN = os.getenv("TOKEN")
+
+bot = commands.Bot(command_prefix="$")
 
 
+@bot.command(
+    help="A simple marco-polo echo test to see if the bot is alive.",
+    brief="Say marco, hear polo!"
+)
+async def marco(ctx):
+    await ctx.channel.send("polo")
 
-client = discord.Client()
-
-sad_words = ["kms", "fuck me"]
-
-pma = [
-    "Please bro",
-    "GUH",
-    "mood bro"
-]
-
-def get_quote():
-    response = requests.get("https://zenquotes.io/api/random")
-    json_data = json.loads(response.text)
-    quote = json_data[0]['q'] + " -" + json_data[0]['a']
-    return (quote)
+@bot.command(
+    help="Echos your message in chat",
+    brief="Repeats your message"
+)
+async def print(ctx, *msg):
+    response = ""
+    for arg in msg:
+        response += arg + ' '
+    await ctx.channel.send(response)
 
 
-@client.event
-async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
-
-@client.event
+@bot.event
 async def on_message(message):
-    if message.author == client.user:
-        return
+    if message.content == "hello":
+        await message.channel.send("sup how u doin")
 
-    msg = message.content
-
-    if msg.startswith('!hello'):
-        await message.channel.send('Sup bitch')
-
-    if msg.startswith('!quote'):
-        # quote = get_quote()
-        await message.channel.send(get_quote())
-
-    if any(word in msg for word in sad_words):
-        await message.channel.send(random.choice
-                                   (pma))
+    await bot.process_commands(message)
 
 
-client.run(os.environ['TOKEN'])
+bot.run(DISCORD_TOKEN)
